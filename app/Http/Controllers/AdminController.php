@@ -38,7 +38,7 @@ class AdminController extends Controller
 
     public function listarReservas()
     {
-        $reservas = Reserva::with(['cliente', 'servicio', 'empleado'])
+        $reservas = Reserva::with(['cliente', 'servicio', 'empleado', 'detalles.servicio'])
             ->orderBy('fecha', 'desc')
             ->orderBy('hora', 'desc')
             ->get();

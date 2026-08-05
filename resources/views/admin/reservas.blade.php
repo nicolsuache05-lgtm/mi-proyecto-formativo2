@@ -27,7 +27,19 @@
             <tr>
               <td>{{ $r->id_reserva }}</td>
               <td>{{ $r->cliente->nombre ?? 'Desconocido' }}</td>
-              <td>{{ $r->servicio->nombre_servicio ?? 'Servicio no encontrado' }}</td>
+              <td>
+                @if ($r->detalles && $r->detalles->isNotEmpty())
+                  <ul style="margin:0; padding-left:15px; font-size:13px; color:#c0375a; font-weight:500;">
+                    @foreach ($r->detalles as $det)
+                      @if ($det->servicio)
+                        <li>{{ $det->servicio->nombre_servicio }}</li>
+                      @endif
+                    @endforeach
+                  </ul>
+                @else
+                  {{ $r->servicio->nombre_servicio ?? 'Servicio no encontrado' }}
+                @endif
+              </td>
               <td>{{ $r->fecha }}</td>
               <td>{{ $r->hora }}</td>
               <td><span class="badge badge-{{ $r->estado }}">{{ ucfirst($r->estado) }}</span></td>

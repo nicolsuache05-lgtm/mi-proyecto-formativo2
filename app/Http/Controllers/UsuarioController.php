@@ -13,7 +13,7 @@ class UsuarioController extends Controller
     {
         $clienteId = Auth::guard('web')->id();
         $reservas = Reserva::where('id_cliente', $clienteId)
-            ->with('servicio')
+            ->with(['servicio', 'detalles.servicio'])
             ->orderBy('fecha', 'desc')
             ->orderBy('hora', 'desc')
             ->get();
@@ -27,7 +27,11 @@ class UsuarioController extends Controller
         if ($request->isMethod('post')) {
             $fecha = $request->input('fecha', '');
             $hora = $request->input('hora', '');
-            $id_servicio = (int)$request->input('id_servicio', 0);
+            $id_servicios = $request->input('id_servicios', []);
+
+            if (empty($id_servicios)) {
+                return redirect()->back()->with('flash_error', 'Debes seleccionar al menos un servicio.')->withInput();
+            }
 
             if ($fecha < date('Y-m-d')) {
                 return redirect()->back()->with('flash_error', 'No puedes agendar fechas pasadas.')->withInput();
@@ -42,17 +46,32 @@ class UsuarioController extends Controller
                 return redirect()->back()->with('flash_error', 'Ese horario ya está reservado.')->withInput();
             }
 
+            $primary_id_servicio = (int)$id_servicios[0];
+
             $ok = Reserva::create([
                 'fecha'        => $fecha,
                 'hora'         => $hora,
                 'id_cliente'   => Auth::guard('web')->id(),
-                'id_servicio'  => $id_servicio,
+                'id_servicio'  => $primary_id_servicio,
                 'id_empleados' => null,
                 'estado'       => 'pendiente',
             ]);
 
             if ($ok) {
-                return redirect()->route('cliente.misReservas')->with('flash_ok', 'Reserva creada exitosamente.');
+                foreach ($id_servicios as $id_s) {
+                    $servicio = Servicio::find($id_s);
+                    if ($servicio) {
+                        \App\Models\DetalleServicio::create([
+                            'id_reserva'      => $ok->id_reserva,
+                            'id_servicio'     => (int)$id_s,
+                            'cantidad'        => '1',
+                            'precio_unitario' => $servicio->precio,
+                            'subtotal'        => $servicio->precio,
+                        ]);
+                    }
+                }
+
+                return redirect()->route('cliente.misReservas')->with('flash_ok', 'Reserva creada exitosamente con los servicios seleccionados.');
             } else {
                 return redirect()->back()->with('flash_error', 'Error al crear la reserva.')->withInput();
             }
@@ -66,7 +85,7 @@ class UsuarioController extends Controller
     {
         $clienteId = Auth::guard('web')->id();
         $reservas = Reserva::where('id_cliente', $clienteId)
-            ->with('servicio')
+            ->with(['servicio', 'detalles.servicio'])
             ->orderBy('fecha', 'desc')
             ->orderBy('hora', 'desc')
             ->get();

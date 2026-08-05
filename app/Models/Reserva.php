@@ -36,4 +36,9 @@ class Reserva extends Model
     {
         return $this->belongsTo(Empleado::class, 'id_empleados', 'id_empleados');
     }
+
+    public function detalles()
+    {
+        return $this->hasMany(DetalleServicio::class, 'id_reserva', 'id_reserva');
+    }
 }

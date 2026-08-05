@@ -106,7 +106,7 @@ class DatabaseSeeder extends Seeder
                     'precio' => 45000,
                     'id_administrador' => $adminId,
                     'categoria' => 'Pedicure',
-                    'imagen' => 'img/semipermanente.png',
+                    'imagen' => 'img/pedicure_spa.png',
                 ],
                 [
                     'nombre_servicio' => 'Retiro pedicure',
@@ -114,7 +114,7 @@ class DatabaseSeeder extends Seeder
                     'precio' => 15000,
                     'id_administrador' => $adminId,
                     'categoria' => 'Pedicure',
-                    'imagen' => 'img/retiro_acrilico.png',
+                    'imagen' => 'img/pedicure_spa.png',
                 ],
             ]);
         }

@@ -31,11 +31,29 @@
             @foreach ($reservas as $r)
             <tr>
               <td>{{ $r->id_reserva }}</td>
-              <td>{{ $r->servicio->nombre_servicio ?? 'Servicio no encontrado' }}</td>
+              <td>
+                @if ($r->detalles && $r->detalles->isNotEmpty())
+                  <ul style="margin:0; padding-left:15px; font-size:13px; color:#c0375a; font-weight:500;">
+                    @foreach ($r->detalles as $det)
+                      @if ($det->servicio)
+                        <li>{{ $det->servicio->nombre_servicio }}</li>
+                      @endif
+                    @endforeach
+                  </ul>
+                @else
+                  {{ $r->servicio->nombre_servicio ?? 'Servicio no encontrado' }}
+                @endif
+              </td>
               <td>{{ $r->fecha }}</td>
               <td>{{ $r->hora }}</td>
               <td><span class="badge badge-{{ $r->estado }}">{{ ucfirst($r->estado) }}</span></td>
-              <td>${{ number_format($r->servicio->precio ?? 0, 0, ',', '.') }}</td>
+              <td>
+                @if ($r->detalles && $r->detalles->isNotEmpty())
+                  ${{ number_format($r->detalles->sum('subtotal'), 0, ',', '.') }}
+                @else
+                  ${{ number_format($r->servicio->precio ?? 0, 0, ',', '.') }}
+                @endif
+              </td>
               <td>
                 @if ($r->estado === 'pendiente')
                   <a href="{{ route('cliente.cancelarReserva', $r->id_reserva) }}"

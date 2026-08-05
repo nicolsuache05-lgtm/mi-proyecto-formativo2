@@ -87,13 +87,13 @@
       @foreach ($items as $s)
         <label style="cursor:pointer; display: block;">
           <input 
-            type="radio" 
-            name="id_servicio" 
+            type="checkbox" 
+            name="id_servicios[]" 
             value="{{ $s->id_servicio }}"
+            data-precio="{{ $s->precio }}"
             style="display:none" 
-            class="radio-servicio"
+            class="checkbox-servicio"
             onchange="seleccionarServicio(this)"
-            required
           >
 
           <div 
@@ -126,8 +126,14 @@
     </div>
   @endforeach
 
+          <!-- Contenedor del Total Seleccionado -->
+          <div id="total-container" style="display:none; justify-content:space-between; align-items:center; background:#fdf0f5; border:2px solid #e8527a; border-radius:14px; padding:12px 20px; margin-top:15px; margin-bottom:15px;">
+            <div style="font-weight:600; color:#c0375a; font-size:14px;">Total Servicios Seleccionados:</div>
+            <div id="total-reserva" style="font-weight:700; color:#4a2030; font-size:18px;">$0</div>
+          </div>
+
           <p id="msg-servicio" style="color:#a32d2d;font-size:12px;display:none;margin-top:6px">
-            Selecciona un servicio para continuar.
+            Selecciona al menos un servicio para continuar.
           </p>
         @endif
       </div>
@@ -212,29 +218,52 @@
       }
   }
 
-  function seleccionarServicio(radio) {
-      document.querySelectorAll('.servicio-card').forEach(function(card) {
-          card.style.border = '2px solid #f4c0d1';
-          card.style.background = '#fdf0f5';
-      });
-
-      const card = document.getElementById('card-' + radio.value);
+  function seleccionarServicio(checkbox) {
+      const card = document.getElementById('card-' + checkbox.value);
       if (card) {
-          card.style.border = '2px solid #e8527a';
-          card.style.background = '#fce4ef';
+          if (checkbox.checked) {
+              card.style.border = '2px solid #e8527a';
+              card.style.background = '#fce4ef';
+          } else {
+              card.style.border = '2px solid #f4c0d1';
+              card.style.background = '#fdf0f5';
+          }
       }
 
       const mensaje = document.getElementById('msg-servicio');
       if (mensaje) {
           mensaje.style.display = 'none';
       }
+
+      actualizarTotal();
+  }
+
+  function actualizarTotal() {
+      let total = 0;
+      document.querySelectorAll('input[name="id_servicios[]"]:checked').forEach(function(el) {
+          total += parseFloat(el.getAttribute('data-precio') || 0);
+      });
+
+      const totalElement = document.getElementById('total-reserva');
+      if (totalElement) {
+          totalElement.innerText = '$' + new Intl.NumberFormat('es-CO', { minimumFractionDigits: 0 }).format(total);
+      }
+
+      const totalContainer = document.getElementById('total-container');
+      if (totalContainer) {
+          if (total > 0) {
+              totalContainer.style.display = 'flex';
+          } else {
+              totalContainer.style.display = 'none';
+          }
+      }
   }
 
   function validarFormulario() {
-      const seleccionado = document.querySelector('input[name="id_servicio"]:checked');
+      const seleccionados = document.querySelectorAll('input[name="id_servicios[]"]:checked');
       const mensaje = document.getElementById('msg-servicio');
 
-      if (!seleccionado) {
+      if (seleccionados.length === 0) {
           if (mensaje) {
               mensaje.style.display = 'block';
           }
