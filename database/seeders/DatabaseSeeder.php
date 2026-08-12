@@ -19,7 +19,7 @@ class DatabaseSeeder extends Seeder
             $adminId = $admin->id_administrador;
         } else {
             $adminId = DB::table('administrador')->insertGetId([
-                'nombre' => 'Alejandra Gómez',
+                'nombre' => 'Alejandra Vanegas',
                 'correo' => 'admin@alejaNails.com',
                 'usuario' => 'admin',
                 'contraseña' => Hash::make('admin123'), // Hash the password
