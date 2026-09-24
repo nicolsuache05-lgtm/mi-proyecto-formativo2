@@ -140,19 +140,24 @@
 
       <div class="form-row" style="margin-top:8px">
         <div class="form-group">
-          <label>Fecha</label>
+          <label for="input-fecha">Fecha</label>
           <input 
             type="date" 
             name="fecha" 
+            id="input-fecha"
             required 
             min="{{ date('Y-m-d') }}"
             value="{{ old('fecha') }}"
+            onchange="actualizarHorasOcupadas()"
           >
         </div>
 
         <div class="form-group">
-          <label>Hora</label>
-          <select name="hora" required>
+          <label for="select-hora">
+            Hora
+            <span id="hora-status-indicator" style="font-size:11px;font-weight:500;text-transform:none;margin-left:8px;"></span>
+          </label>
+          <select name="hora" id="select-hora" required onchange="verificarHoraSeleccionada()">
             <option value="">— Hora —</option>
             @php
             $horas = [
@@ -165,11 +170,17 @@
             ];
             @endphp
             @foreach ($horas as $h)
-              <option value="{{ $h }}" {{ old('hora') == $h ? 'selected' : '' }}>
+              <option value="{{ $h }}" data-original="{{ $h }}" {{ old('hora') == $h ? 'selected' : '' }}>
                 {{ $h }}
               </option>
             @endforeach
           </select>
+
+          <!-- Aviso dinámico si la hora seleccionada ya está ocupada -->
+          <div id="aviso-hora-ocupada" style="display:none; margin-top:10px; padding:10px 14px; background:#fff2f4; border:1.5px solid #f7b2c4; border-radius:12px; color:#a32d2d; font-size:12.5px; font-weight:500; align-items:center; gap:8px;">
+            <span style="font-size:16px;">⚠️</span>
+            <span id="texto-aviso-hora">Esta hora ya está ocupada para este día. Por favor elige otro horario.</span>
+          </div>
         </div>
       </div>
 
@@ -193,6 +204,126 @@
   </div>
 
   <script>
+  let horasOcupadasActuales = [];
+
+  async function actualizarHorasOcupadas() {
+      const fechaInput = document.getElementById('input-fecha');
+      const selectHora = document.getElementById('select-hora');
+      const indicator = document.getElementById('hora-status-indicator');
+      const aviso = document.getElementById('aviso-hora-ocupada');
+
+      if (!fechaInput || !selectHora) return;
+      const fecha = fechaInput.value;
+
+      if (!fecha) {
+          horasOcupadasActuales = [];
+          resetearSelectHoras();
+          if (indicator) indicator.textContent = '';
+          if (aviso) aviso.style.display = 'none';
+          return;
+      }
+
+      if (indicator) {
+          indicator.innerHTML = '<span style="color:#b07090;">⏳ Comprobando disponibilidad...</span>';
+      }
+
+      try {
+          const res = await fetch(`{{ route('cliente.horasOcupadas') }}?fecha=${encodeURIComponent(fecha)}`);
+          const data = await res.json();
+          horasOcupadasActuales = data.ocupadas || [];
+
+          let ocupadasCount = 0;
+          let totalHoras = 0;
+
+          Array.from(selectHora.options).forEach(opt => {
+              if (!opt.value) return;
+              totalHoras++;
+              const horaBase = opt.getAttribute('data-original') || opt.value;
+
+              if (horasOcupadasActuales.includes(horaBase)) {
+                  ocupadasCount++;
+                  opt.textContent = `${horaBase} — 🚫 (Ya ocupada)`;
+                  opt.disabled = true;
+                  opt.style.color = '#a32d2d';
+                  opt.style.background = '#fde8e8';
+                  opt.style.fontWeight = '600';
+              } else {
+                  opt.textContent = horaBase;
+                  opt.disabled = false;
+                  opt.style.color = '';
+                  opt.style.background = '';
+                  opt.style.fontWeight = 'normal';
+              }
+          });
+
+          // Si la hora previamente seleccionada ahora está ocupada, avisar
+          if (selectHora.value && horasOcupadasActuales.includes(selectHora.value)) {
+              mostrarAvisoHoraOcupada(selectHora.value);
+              selectHora.style.borderColor = '#e8527a';
+          } else {
+              if (aviso) aviso.style.display = 'none';
+              selectHora.style.borderColor = '#f4c0d1';
+          }
+
+          if (indicator) {
+              if (ocupadasCount === 0) {
+                  indicator.innerHTML = '<span style="color:#3b6d11;">✓ Todos los horarios disponibles</span>';
+              } else if (ocupadasCount >= totalHoras) {
+                  indicator.innerHTML = '<span style="color:#a32d2d;font-weight:600;">❌ Sin horarios disponibles</span>';
+              } else {
+                  indicator.innerHTML = `<span style="color:#c0375a;font-weight:500;">⚠️ ${ocupadasCount} horario(s) ocupado(s)</span>`;
+              }
+          }
+      } catch (err) {
+          console.error('Error al consultar horarios ocupados:', err);
+          if (indicator) indicator.textContent = '';
+      }
+  }
+
+  function verificarHoraSeleccionada() {
+      const selectHora = document.getElementById('select-hora');
+      const valor = selectHora ? selectHora.value : '';
+
+      if (valor && horasOcupadasActuales.includes(valor)) {
+          mostrarAvisoHoraOcupada(valor);
+          selectHora.style.borderColor = '#e8527a';
+      } else {
+          const aviso = document.getElementById('aviso-hora-ocupada');
+          if (aviso) aviso.style.display = 'none';
+          if (selectHora) selectHora.style.borderColor = '#f4c0d1';
+      }
+  }
+
+  function mostrarAvisoHoraOcupada(hora) {
+      const aviso = document.getElementById('aviso-hora-ocupada');
+      const texto = document.getElementById('texto-aviso-hora');
+      if (aviso && texto) {
+          texto.textContent = `⚠️ ¡Atención! La hora ${hora} ya está ocupada para este día. Por favor, selecciona otro horario disponible.`;
+          aviso.style.display = 'flex';
+      }
+  }
+
+  function resetearSelectHoras() {
+      const selectHora = document.getElementById('select-hora');
+      if (!selectHora) return;
+      Array.from(selectHora.options).forEach(opt => {
+          if (!opt.value) return;
+          const horaBase = opt.getAttribute('data-original') || opt.value;
+          opt.textContent = horaBase;
+          opt.disabled = false;
+          opt.style.color = '';
+          opt.style.background = '';
+          opt.style.fontWeight = 'normal';
+      });
+  }
+
+  document.addEventListener('DOMContentLoaded', function() {
+      const fechaInput = document.getElementById('input-fecha');
+      if (fechaInput && fechaInput.value) {
+          actualizarHorasOcupadas();
+      }
+  });
+
   function mostrarCategoria(cat) {
       const idCat = 'cat-' + cat;
       const idTab = 'tab-' + cat;
@@ -269,6 +400,33 @@
           }
           return false;
       }
+
+      const fechaInput = document.getElementById('input-fecha');
+      if (!fechaInput || !fechaInput.value) {
+          alert('Por favor selecciona una fecha para la reserva.');
+          if (fechaInput) fechaInput.focus();
+          return false;
+      }
+
+      const selectHora = document.getElementById('select-hora');
+      const horaSeleccionada = selectHora ? selectHora.value : '';
+
+      if (!horaSeleccionada) {
+          alert('Por favor selecciona una hora para la reserva.');
+          if (selectHora) selectHora.focus();
+          return false;
+      }
+
+      if (horasOcupadasActuales.includes(horaSeleccionada)) {
+          mostrarAvisoHoraOcupada(horaSeleccionada);
+          if (selectHora) {
+              selectHora.style.borderColor = '#e8527a';
+              selectHora.focus();
+          }
+          alert(`⚠️ La hora seleccionada (${horaSeleccionada}) ya se encuentra ocupada para la fecha elegida. Por favor, selecciona otro horario.`);
+          return false;
+      }
+
       return true;
   }
   </script>

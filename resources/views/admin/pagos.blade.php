@@ -19,6 +19,7 @@
               <th>Fecha pago</th>
               <th>Método</th>
               <th>Valor</th>
+              <th>Acción</th>
             </tr>
           </thead>
           <tbody>
@@ -28,8 +29,13 @@
               <td>{{ $p->reserva->cliente->nombre ?? 'Cliente no encontrado' }}</td>
               <td>{{ $p->reserva->servicio->nombre_servicio ?? 'Servicio no encontrado' }}</td>
               <td>{{ $p->fecha_pago }}</td>
-              <td>{{ $p->metodo_pago }}</td>
+              <td><span class="badge badge-success">{{ strtoupper($p->metodo_pago) }}</span></td>
               <td>${{ number_format($p->valor_pagado ?? 0, 0, ',', '.') }}</td>
+              <td>
+                <a href="{{ route('admin.pago.factura', $p->id_reserva) }}" class="btn btn-outline" style="padding:4px 10px;font-size:12px">
+                  📄 Ver Factura
+                </a>
+              </td>
             </tr>
             @endforeach
           </tbody>

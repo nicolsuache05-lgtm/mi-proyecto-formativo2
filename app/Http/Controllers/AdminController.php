@@ -18,7 +18,13 @@ class AdminController extends Controller
         $totalPagos = Pago::count();
         $totalServicios = Servicio::count();
 
-        return view('dashboard.admin', compact('totalClientes', 'totalReservas', 'totalPagos', 'totalServicios'));
+        // Obtener notificaciones de los últimos pagos recibidos
+        $pagosRecientes = Pago::with(['reserva.cliente', 'reserva.servicio'])
+            ->orderBy('id_pago', 'desc')
+            ->take(5)
+            ->get();
+
+        return view('dashboard.admin', compact('totalClientes', 'totalReservas', 'totalPagos', 'totalServicios', 'pagosRecientes'));
     }
 
     public function listarClientes()
@@ -178,5 +184,18 @@ class AdminController extends Controller
             ->get();
 
         return view('admin.pagos', compact('pagos'));
+    }
+
+    public function verFacturaAdmin($id)
+    {
+        $reserva = Reserva::where('id_reserva', $id)
+            ->with(['cliente', 'servicio', 'detalles.servicio', 'pago'])
+            ->firstOrFail();
+
+        if (!$reserva->pago) {
+            return redirect()->route('admin.pagos')->with('flash_error', 'Esta reserva no tiene pago registrado.');
+        }
+
+        return view('usuarios.factura', compact('reserva'));
     }
 }

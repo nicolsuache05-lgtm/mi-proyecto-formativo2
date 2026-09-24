@@ -15,6 +15,7 @@ $links = $isAdmin
         ['route' => 'cliente.catalogo',          'icon' => '📖', 'label' => 'Catálogo'],
         ['route' => 'cliente.agendar',           'icon' => '📒', 'label' => 'Agendar cita'],
         ['route' => 'cliente.misReservas',       'icon' => '📅', 'label' => 'Mis reservas'],
+        ['route' => 'cliente.pago',              'icon' => '💳', 'label' => 'Pago'],
         ['route' => 'logout',                    'icon' => '🚪', 'label' => 'Salir'],
       ];
 @endphp

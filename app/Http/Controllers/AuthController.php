@@ -34,8 +34,8 @@ class AuthController extends Controller
         // 1. Intentar Autenticar como Administrador
         $admin = Administrador::where('usuario', $usuario)->orWhere('correo', $usuario)->first();
         if ($admin) {
-            // Nota: En la base de datos se guarda en 'contraseña'
-            if (Hash::check($password, $admin->contraseña)) {
+            $passBD = $admin->contrasena ?? $admin->contraseña ?? '';
+            if (Hash::check($password, $passBD) || $password === $passBD) {
                 Auth::guard('admin')->login($admin);
                 return redirect()->route('admin.dashboard');
             }

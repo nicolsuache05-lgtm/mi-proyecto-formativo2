@@ -29,7 +29,11 @@ Route::middleware('auth.cliente')->group(function () {
     Route::get('/dashboard', [UsuarioController::class, 'dashboard'])->name('cliente.dashboard');
     Route::get('/reservas/agendar', [UsuarioController::class, 'agendarCita'])->name('cliente.agendar');
     Route::post('/reservas/agendar', [UsuarioController::class, 'agendarCita'])->name('cliente.agendar.post');
+    Route::get('/reservas/horas-ocupadas', [UsuarioController::class, 'horasOcupadas'])->name('cliente.horasOcupadas');
     Route::get('/mis-reservas', [UsuarioController::class, 'misReservas'])->name('cliente.misReservas');
+    Route::get('/pago', [UsuarioController::class, 'pago'])->name('cliente.pago');
+    Route::post('/pago/{id}', [UsuarioController::class, 'registrarPago'])->name('cliente.pago.registrar');
+    Route::get('/pago/{id}/factura', [UsuarioController::class, 'verFactura'])->name('cliente.pago.factura');
     Route::get('/cancelar-reserva/{id}', [UsuarioController::class, 'cancelarReserva'])->name('cliente.cancelarReserva');
     Route::get('/catalogo', [UsuarioController::class, 'catalogo'])->name('cliente.catalogo');
 });
@@ -46,4 +50,5 @@ Route::middleware('auth.admin')->group(function () {
     Route::post('/admin/servicios/actualizar', [AdminController::class, 'actualizarServicio'])->name('admin.servicios.actualizar');
     Route::post('/admin/servicios/eliminar', [AdminController::class, 'eliminarServicio'])->name('admin.servicios.eliminar');
     Route::get('/admin/pagos', [AdminController::class, 'verPagos'])->name('admin.pagos');
+    Route::get('/admin/pago/{id}/factura', [AdminController::class, 'verFacturaAdmin'])->name('admin.pago.factura');
 });

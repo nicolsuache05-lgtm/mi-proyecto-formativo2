@@ -29,6 +29,7 @@
     <div style="display:flex;gap:12px;flex-wrap:wrap">
       <a href="{{ route('cliente.agendar') }}" class="btn btn-primary">📅 Agendar nueva cita</a>
       <a href="{{ route('cliente.misReservas') }}" class="btn btn-outline">📋 Ver mis reservas</a>
+      <a href="{{ route('cliente.pago') }}" class="btn btn-outline">💳 Ir a pagos</a>
       <a href="{{ route('cliente.catalogo') }}" class="btn btn-outline">💅 Catálogo agrupado</a>
     </div>
   </div>

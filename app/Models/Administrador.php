@@ -17,6 +17,7 @@ class Administrador extends Authenticatable
         'nombre',
         'correo',
         'usuario',
+        'contrasena',
         'contraseña',
     ];
 
@@ -25,7 +26,6 @@ class Administrador extends Authenticatable
      */
     public function getAuthPassword()
     {
-        // En este proyecto, el administrador usa la columna "contraseña"
-        return $this->contraseña;
+        return $this->contrasena ?? $this->contraseña ?? '';
     }
 }

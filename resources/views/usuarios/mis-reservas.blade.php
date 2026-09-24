@@ -24,6 +24,7 @@
               <th>Hora</th>
               <th>Estado</th>
               <th>Precio</th>
+              <th>Pago</th>
               <th>Acción</th>
             </tr>
           </thead>
@@ -52,6 +53,18 @@
                   ${{ number_format($r->detalles->sum('subtotal'), 0, ',', '.') }}
                 @else
                   ${{ number_format($r->servicio->precio ?? 0, 0, ',', '.') }}
+                @endif
+              </td>
+              <td>
+                @if ($r->pago)
+                  <span style="display:inline-flex;flex-direction:column;gap:2px;background:#eaf3de;color:#3b6d11;border-radius:10px;padding:6px 10px;font-size:11px;font-weight:600;white-space:nowrap">
+                    <span>✓ Pagado</span>
+                    <span style="font-size:10px;font-weight:500">{{ ucfirst($r->pago->metodo_pago) }}</span>
+                  </span>
+                @else
+                  <span style="display:inline-block;background:#faeeda;color:#854f0b;border-radius:10px;padding:6px 10px;font-size:11px;font-weight:600;white-space:nowrap">
+                    Pendiente
+                  </span>
                 @endif
               </td>
               <td>

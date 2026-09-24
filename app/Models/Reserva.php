@@ -41,4 +41,9 @@ class Reserva extends Model
     {
         return $this->hasMany(DetalleServicio::class, 'id_reserva', 'id_reserva');
     }
+
+    public function pago()
+    {
+        return $this->hasOne(Pago::class, 'id_reserva', 'id_reserva');
+    }
 }

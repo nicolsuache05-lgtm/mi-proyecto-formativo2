@@ -151,7 +151,18 @@
     .stat-card { background: white; border-radius: 16px; padding: 1.25rem; box-shadow: 0 2px 12px rgba(200,60,100,.07); }
     .stat-card .label { font-size: 11px; color: #b07090; text-transform: uppercase; letter-spacing: .8px; margin-bottom: 6px; }
     .stat-card .value { font-size: 26px; font-weight: 600; color: #c0375a; }
-    .stat-card .change { font-size: 11px; color: #3b6d11; margin-top: 2px; }
+    /* ── Estilos para Impresión ── */
+    @media print {
+      .topbar, aside, .flash, header, footer {
+        display: none !important;
+      }
+      body, .layout, main {
+        background: white !important;
+        padding: 0 !important;
+        margin: 0 !important;
+        display: block !important;
+      }
+    }
   </style>
 </head>
 <body>

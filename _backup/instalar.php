@@ -61,7 +61,7 @@ try {
     $count = $pdo->query("SELECT COUNT(*) FROM administrador")->fetchColumn();
     if ($count == 0) {
         $pdo->exec("INSERT INTO administrador (nombre, correo, usuario, contraseña) VALUES
-            ('Alejandra Gómez', 'admin@alejaNails.com', 'admin', 'admin123')");
+            ('Alejandra Vanegas', 'admin@alejaNails.com', 'admin', 'admin123')");
         ok("Administrador creado — usuario: <strong>admin</strong> | correo: <strong>admin@alejaNails.com</strong> | contraseña: <strong>admin123</strong>");
     } else {
         // Actualizar correo si está vacío
